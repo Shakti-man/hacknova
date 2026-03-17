@@ -34,7 +34,10 @@ router.post('/', async (req, res) => {
           "glossary": []
         }`;
     } else if (mode === 'plain') {
-        systemPrompt = `Clean up the grammar and remove jargon. 
+        systemPrompt = `You are a text cleaning assistant. 
+        Take the following text and clean up the grammar, remove excessive jargon, and break down very long paragraphs. 
+        Make it readable for someone who wants the facts without complex academic language.
+        
         Return your response ONLY as a JSON object with this exact structure:
         {
           "simplifiedText": "the cleaned text here",
@@ -46,7 +49,7 @@ router.post('/', async (req, res) => {
 
     try {
         const model = genAI.getGenerativeModel({
-            model: "gemini-2.5-flash", // Correct model name
+            model: "gemini-2.5-flash", 
             generationConfig: { responseMimeType: "application/json" }
         });
 

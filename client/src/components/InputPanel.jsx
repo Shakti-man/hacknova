@@ -1,6 +1,5 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { Type, Upload, Link as LinkIcon, Download, Loader2, ArrowRight } from 'lucide-react';
-import Tesseract from 'tesseract.js';
 import LoadingPage from './LoadingPage';
 
 export default function InputPanel({ inputText, setInputText, onSimplify, loading }) {
@@ -35,29 +34,35 @@ export default function InputPanel({ inputText, setInputText, onSimplify, loadin
         setFileName(file.name);
         setExtracting(true);
         try {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            let endpoint = '';
             if (file.type === 'application/pdf') {
-                const formData = new FormData();
-                formData.append('file', file);
-                const resp = await fetch('/api/parse-pdf', {
-                    method: 'POST',
-                    body: formData
-                });
-                let data;
-                try {
-                    data = await resp.json();
-                } catch (e) {
-                    throw new Error('Server returned an invalid response. Ensure the backend is running.');
-                }
-                if (!resp.ok) throw new Error(data.error);
-                setInputText(data.text);
-                setActiveTab('text');
+                endpoint = '/api/parse-pdf';
             } else if (file.type.startsWith('image/')) {
-                const result = await Tesseract.recognize(file, 'eng');
-                setInputText(result.data.text);
-                setActiveTab('text');
+                endpoint = '/api/ocr-image';
             } else {
                 alert('Unsupported file type. Please upload PDF or images.');
+                setExtracting(false);
+                return;
             }
+
+            const resp = await fetch(endpoint, {
+                method: 'POST',
+                body: formData
+            });
+
+            let data;
+            try {
+                data = await resp.json();
+            } catch (e) {
+                throw new Error('Server returned an invalid response. Ensure the backend is running.');
+            }
+
+            if (!resp.ok) throw new Error(data.error);
+            setInputText(data.text);
+            setActiveTab('text');
         } catch (err) {
             alert(`Extraction failed: ${err.message}`);
         } finally {

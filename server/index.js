@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
 const dotenv = require('dotenv');
 const fetch = require('node-fetch');
 const cheerio = require('cheerio');
@@ -26,9 +27,47 @@ app.use((req, res, next) => {
 
 const upload = multer({ storage: multer.memoryStorage() });
 
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+
 // Routes
 app.use('/api/simplify', simplifyRoute);
 
+// OCR Route for Images (Powered by Gemini)
+app.post('/api/ocr-image', upload.single('file'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No image uploaded' });
+    }
+
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+
+    // Conversion to Gemini inlineData format
+    const imagePart = {
+      inlineData: {
+        data: req.file.buffer.toString("base64"),
+        mimeType: req.file.mimetype,
+      },
+    };
+
+    const prompt = "Please transcribe the text in this image accurately. Return only the extracted text without any commentary or additional formatting.";
+    const result = await model.generateContent([prompt, imagePart]);
+    const extractedText = result.response.text().trim();
+
+    if (!extractedText) {
+      throw new Error('Gemini returned empty text');
+    }
+
+    res.json({ text: extractedText });
+  } catch (error) {
+    console.error('Gemini OCR Error Details:', error);
+    res.status(500).json({ 
+      error: 'Failed to extract text from image',
+      details: error.message 
+    });
+  }
+});
+
+// PDF Parsing (keeps pdf-parse, but backend is now more modular)
 app.post('/api/parse-pdf', upload.single('file'), async (req, res) => {
   try {
     if (!req.file) {
