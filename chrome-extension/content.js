@@ -12,17 +12,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             return;
         }
 
-        // Show a loading overlay here if needed.
-
-        fetch('http://localhost:5000/api/simplify', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ text: fullText.substring(0, 3000), mode: 'simplified' }) // truncate to avoid too large payload
-        })
-            .then(r => r.json())
-            .then(data => {
-                if (data.error) throw new Error(data.error);
-
+        // Send to background script for fetch to bypass PNA/CORS blocks on webpage
+        chrome.runtime.sendMessage({ 
+            action: "FETCH_SIMPLIFY", 
+            text: fullText.substring(0, 3000), 
+            mode: 'simplified' 
+        }, (response) => {
+            if (response && response.success) {
+                const data = response.data;
                 // Create overlay
                 const overlay = document.createElement('div');
                 overlay.style.position = 'fixed';
@@ -71,7 +68,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 overlay.appendChild(closeBtn);
                 overlay.appendChild(textNode);
                 document.body.appendChild(overlay);
-            })
-            .catch(err => alert("Lexify Error: " + err.message));
+            } else {
+                alert("Lexify Error: " + (response ? response.error : "Communication failed"));
+            }
+        });
     }
 });

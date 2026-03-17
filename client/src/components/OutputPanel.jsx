@@ -35,16 +35,16 @@ export default function OutputPanel({
     ];
 
     return (
-        <div className="flex flex-col flex-1 bg-slate-800 rounded-2xl shadow-xl overflow-hidden border border-slate-700 relative h-full">
+        <div className="flex flex-col flex-1 bg-white rounded-2xl shadow-sm border border-[#E2E8F0] overflow-hidden relative h-full">
             {/* Tabs */}
-            <div className="flex bg-slate-800 border-b border-slate-700">
+            <div className="flex bg-white border-b border-[#E2E8F0]">
                 {tabs.map((tab) => (
                     <button
                         key={tab.id}
                         onClick={() => onModeChange(tab.id)}
                         className={`flex-1 py-4 flex items-center justify-center space-x-2 font-medium transition-colors ${mode === tab.id
-                                ? 'bg-slate-700 text-cyan-400 border-b-2 border-cyan-400'
-                                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-750'
+                                ? 'bg-[#F8FAFC] text-[#4A90E2] border-b-2 border-[#4A90E2]'
+                                : 'text-[#555555] hover:text-[#333333] hover:bg-[#F8FAFC]'
                             }`}
                     >
                         {tab.icon} <span>{tab.label}</span>
@@ -53,7 +53,7 @@ export default function OutputPanel({
             </div>
 
             {/* Toolbar */}
-            <div className="px-6 py-3 border-b border-slate-700 flex justify-between items-center bg-slate-800/50">
+            <div className="px-6 py-3 border-b border-[#E2E8F0] flex justify-between items-center bg-[#F8FAFC]/50">
                 <ReadabilityBadge before={readabilityBefore} after={readabilityAfter} />
 
                 <div className="flex space-x-2">
@@ -61,16 +61,16 @@ export default function OutputPanel({
                     <button
                         onClick={handleCopy}
                         disabled={!currentResult}
-                        className="p-2 text-slate-400 hover:text-cyan-400 hover:bg-slate-700 rounded transition-colors disabled:opacity-50"
+                        className="p-2 text-[#555555] hover:text-[#4A90E2] hover:bg-[#F1F5F9] rounded transition-colors disabled:opacity-50"
                         title="Copy to clipboard"
                     >
-                        <Copy size={20} className={copied ? "text-green-400" : ""} />
-                        {copied && <span className="absolute mt-8 -ml-4 text-xs text-green-400 font-bold animate-fade-in">Copied!</span>}
+                        <Copy size={20} className={copied ? "text-green-600" : ""} />
+                        {copied && <span className="absolute mt-8 -ml-4 text-xs text-green-600 font-bold animate-fade-in">Copied!</span>}
                     </button>
                     <button
                         onClick={handleDownload}
                         disabled={!currentResult}
-                        className="p-2 text-slate-400 hover:text-cyan-400 hover:bg-slate-700 rounded transition-colors disabled:opacity-50"
+                        className="p-2 text-[#555555] hover:text-[#4A90E2] hover:bg-[#F1F5F9] rounded transition-colors disabled:opacity-50"
                         title="Download .txt"
                     >
                         <Download size={20} />
@@ -79,18 +79,18 @@ export default function OutputPanel({
             </div>
 
             {/* Content Area */}
-            <div className="flex-1 p-6 overflow-y-auto relative">
+            <div className="flex-1 p-6 overflow-y-auto relative bg-[#FDFBF7]">
                 {loading ? (
                     <div className="animate-pulse space-y-4">
-                        <div className="h-4 bg-slate-700 rounded w-3/4"></div>
-                        <div className="h-4 bg-slate-700 rounded"></div>
-                        <div className="h-4 bg-slate-700 rounded w-5/6"></div>
-                        <div className="h-4 bg-slate-700 rounded w-1/2"></div>
-                        <div className="h-4 bg-slate-700 rounded"></div>
+                        <div className="h-4 bg-[#E2E8F0] rounded w-3/4"></div>
+                        <div className="h-4 bg-[#E2E8F0] rounded"></div>
+                        <div className="h-4 bg-[#E2E8F0] rounded w-5/6"></div>
+                        <div className="h-4 bg-[#E2E8F0] rounded w-1/2"></div>
+                        <div className="h-4 bg-[#E2E8F0] rounded"></div>
                     </div>
                 ) : currentResult ? (
                     <div
-                        className={`whitespace-pre-wrap animate-fade-in text-slate-100 ${useDyslexicFont ? 'font-lexy' : 'font-sans'}`}
+                        className={`whitespace-pre-wrap animate-fade-in text-[#333333] ${useDyslexicFont ? 'font-lexy' : 'font-sans'}`}
                         style={{
                             fontSize: `${fontSize}px`,
                             lineHeight: lineHeight,
@@ -100,7 +100,7 @@ export default function OutputPanel({
                         {currentResult}
                     </div>
                 ) : (
-                    <div className="h-full flex items-center justify-center text-slate-500 font-medium">
+                    <div className="h-full flex items-center justify-center text-[#888888] font-medium">
                         Your simplified text will appear here...
                     </div>
                 )}

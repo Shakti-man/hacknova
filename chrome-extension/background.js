@@ -6,22 +6,50 @@ chrome.runtime.onInstalled.addListener(() => {
     });
 });
 
+// Central fetcher in background script to bypass PNA/CORS restrictions in popup/content scripts
+async function fetchSimplification(text, mode = 'simplified') {
+    try {
+        const resp = await fetch("http://127.0.0.1:5001/api/simplify", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text, mode })
+        });
+        
+        let data;
+        try {
+            data = await resp.json();
+        } catch(e) {
+            throw new Error("Invalid response from server. Is the backend running?");
+        }
+        
+        if (!resp.ok) throw new Error(data.error || "Server error");
+        return data;
+    } catch (err) {
+        console.error("Fetch error:", err);
+        throw err;
+    }
+}
+
+// Handle messages from popup or content scripts
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.action === "FETCH_SIMPLIFY") {
+        fetchSimplification(request.text, request.mode)
+            .then(data => sendResponse({ success: true, data }))
+            .catch(err => sendResponse({ success: false, error: err.message }));
+        return true; // Keep message channel open for async response
+    }
+});
+
 chrome.contextMenus.onClicked.addListener((info, tab) => {
     if (info.menuItemId === "simplifyWithLexify") {
-        // Inject logic to simplify selected text
-        chrome.scripting.executeScript({
-            target: { tabId: tab.id },
-            function: (selectedText) => {
-                // Simple overlay creation similar to SIMPLIFY_PAGE but specifically for selected text
-                fetch("http://localhost:5000/api/simplify", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ text: selectedText, mode: "simplified" })
-                })
-                    .then(r => r.json())
-                    .then(data => {
-                        if (data.error) throw new Error(data.error);
-
+        const selectedText = info.selectionText;
+        
+        // Use background fetcher then inject results
+        fetchSimplification(selectedText)
+            .then(data => {
+                chrome.scripting.executeScript({
+                    target: { tabId: tab.id },
+                    function: (result) => {
                         const overlay = document.createElement("div");
                         overlay.style.position = "fixed";
                         overlay.style.top = "10%";
@@ -38,7 +66,6 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
                         overlay.style.boxShadow = "0 20px 25px -5px rgba(0, 0, 0, 0.5)";
                         overlay.style.border = "1px solid #334155";
 
-                        // Apply font
                         const fontUrl = "https://fonts.cdnfonts.com/css/opendyslexic";
                         if (!document.querySelector(`link[href="${fontUrl}"]`)) {
                             const link = document.createElement("link");
@@ -63,17 +90,23 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
                         closeBtn.onclick = () => overlay.remove();
 
                         const textNode = document.createElement("div");
-                        textNode.innerText = data.result;
+                        textNode.innerText = result;
                         textNode.style.marginTop = "10px";
                         textNode.style.whiteSpace = "pre-wrap";
 
                         overlay.appendChild(closeBtn);
                         overlay.appendChild(textNode);
                         document.body.appendChild(overlay);
-                    })
-                    .catch(err => alert("Lexify Error: " + err.message));
-            },
-            args: [info.selectionText]
-        });
+                    },
+                    args: [data.result]
+                });
+            })
+            .catch(err => {
+                chrome.scripting.executeScript({
+                    target: { tabId: tab.id },
+                    function: (msg) => alert("Lexify Error: " + msg),
+                    args: [err.message]
+                });
+            });
     }
 });

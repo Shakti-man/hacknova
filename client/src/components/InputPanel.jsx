@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { Type, Upload, Link as LinkIcon, Download, Loader2, ArrowRight } from 'lucide-react';
 import Tesseract from 'tesseract.js';
+import LoadingPage from './LoadingPage';
 
 export default function InputPanel({ inputText, setInputText, onSimplify, loading }) {
     const [activeTab, setActiveTab] = useState('text'); // text, upload, url
@@ -13,7 +14,12 @@ export default function InputPanel({ inputText, setInputText, onSimplify, loadin
         setExtracting(true);
         try {
             const resp = await fetch(`/api/fetch-url?url=${encodeURIComponent(urlInput)}`);
-            const data = await resp.json();
+            let data;
+            try {
+                data = await resp.json();
+            } catch (e) {
+                throw new Error('Server returned an invalid response. Ensure the backend is running.');
+            }
             if (!resp.ok) throw new Error(data.error);
             setInputText(data.text);
             setActiveTab('text');
@@ -36,7 +42,12 @@ export default function InputPanel({ inputText, setInputText, onSimplify, loadin
                     method: 'POST',
                     body: formData
                 });
-                const data = await resp.json();
+                let data;
+                try {
+                    data = await resp.json();
+                } catch (e) {
+                    throw new Error('Server returned an invalid response. Ensure the backend is running.');
+                }
                 if (!resp.ok) throw new Error(data.error);
                 setInputText(data.text);
                 setActiveTab('text');
@@ -61,25 +72,25 @@ export default function InputPanel({ inputText, setInputText, onSimplify, loadin
     };
 
     return (
-        <div className="flex flex-col flex-1 bg-slate-800 rounded-2xl shadow-xl overflow-hidden border border-slate-700">
+        <div className="flex flex-col flex-1 bg-white rounded-2xl shadow-sm border border-[#E2E8F0] overflow-hidden">
 
             {/* Tabs */}
-            <div className="flex bg-slate-800 border-b border-slate-700">
+            <div className="flex bg-white border-b border-[#E2E8F0]">
                 <button
                     onClick={() => setActiveTab('text')}
-                    className={`flex-1 py-4 flex items-center justify-center space-x-2 font-medium transition-colors ${activeTab === 'text' ? 'bg-slate-700 text-teal-400 border-b-2 border-teal-400' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-750'}`}
+                    className={`flex-1 py-4 flex items-center justify-center space-x-2 font-medium transition-colors ${activeTab === 'text' ? 'bg-[#F8FAFC] text-[#4A90E2] border-b-2 border-[#4A90E2]' : 'text-[#555555] hover:text-[#333333] hover:bg-[#F8FAFC]'}`}
                 >
                     <Type size={18} /> <span>Paste Text</span>
                 </button>
                 <button
                     onClick={() => setActiveTab('upload')}
-                    className={`flex-1 py-4 flex items-center justify-center space-x-2 font-medium transition-colors ${activeTab === 'upload' ? 'bg-slate-700 text-teal-400 border-b-2 border-teal-400' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-750'}`}
+                    className={`flex-1 py-4 flex items-center justify-center space-x-2 font-medium transition-colors ${activeTab === 'upload' ? 'bg-[#F8FAFC] text-[#4A90E2] border-b-2 border-[#4A90E2]' : 'text-[#555555] hover:text-[#333333] hover:bg-[#F8FAFC]'}`}
                 >
                     <Upload size={18} /> <span>Upload File</span>
                 </button>
                 <button
                     onClick={() => setActiveTab('url')}
-                    className={`flex-1 py-4 flex items-center justify-center space-x-2 font-medium transition-colors ${activeTab === 'url' ? 'bg-slate-700 text-teal-400 border-b-2 border-teal-400' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-750'}`}
+                    className={`flex-1 py-4 flex items-center justify-center space-x-2 font-medium transition-colors ${activeTab === 'url' ? 'bg-[#F8FAFC] text-[#4A90E2] border-b-2 border-[#4A90E2]' : 'text-[#555555] hover:text-[#333333] hover:bg-[#F8FAFC]'}`}
                 >
                     <LinkIcon size={18} /> <span>Enter URL</span>
                 </button>
@@ -87,19 +98,14 @@ export default function InputPanel({ inputText, setInputText, onSimplify, loadin
 
             {/* Content Area */}
             <div className="flex-1 p-6 flex flex-col relative">
-                {extracting && (
-                    <div className="absolute inset-0 bg-slate-900/80 z-10 flex flex-col items-center justify-center rounded-b-2xl">
-                        <Loader2 size={48} className="animate-spin text-teal-500 mb-4" />
-                        <p className="text-teal-400 font-medium tracking-wide animate-pulse">Extracting text...</p>
-                    </div>
-                )}
+                {extracting && <LoadingPage message="Extracting text..." />}
 
                 {activeTab === 'text' && (
                     <textarea
                         value={inputText}
                         onChange={(e) => setInputText(e.target.value)}
                         placeholder="Paste or type any complex text here..."
-                        className="w-full flex-1 p-4 bg-slate-900 border border-slate-700 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent resize-none h-full"
+                        className="w-full flex-1 p-4 bg-[#FDFBF7] border border-[#E2E8F0] rounded-xl text-[#333333] placeholder-[#888888] focus:outline-none focus:ring-2 focus:ring-[#4A90E2] focus:border-transparent resize-none h-full"
                     />
                 )}
 
@@ -107,7 +113,7 @@ export default function InputPanel({ inputText, setInputText, onSimplify, loadin
                     <div
                         onDragOver={(e) => e.preventDefault()}
                         onDrop={onDrop}
-                        className="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-slate-600 rounded-xl bg-slate-900 hover:bg-slate-800 transition-colors cursor-pointer group p-8 text-center"
+                        className="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-[#CBD5E1] rounded-xl bg-[#FDFBF7] hover:bg-[#F8FAFC] transition-colors cursor-pointer group p-8 text-center"
                         onClick={() => document.getElementById('fileUpload').click()}
                     >
                         <input
@@ -117,35 +123,35 @@ export default function InputPanel({ inputText, setInputText, onSimplify, loadin
                             className="hidden"
                             onChange={(e) => handleFileUpload(e.target.files[0])}
                         />
-                        <Download size={48} className="text-slate-500 group-hover:text-teal-400 transition-colors mb-4" />
-                        <h3 className="text-lg font-medium text-slate-300 mb-2">Drag & Drop file here</h3>
-                        <p className="text-sm text-slate-500">Supports PDF, PNG, JPG</p>
-                        {fileName && <p className="mt-4 text-teal-400 font-medium">Selected: {fileName}</p>}
+                        <Download size={48} className="text-[#888888] group-hover:text-[#4A90E2] transition-colors mb-4" />
+                        <h3 className="text-lg font-medium text-[#333333] mb-2">Drag & Drop file here</h3>
+                        <p className="text-sm text-[#555555]">Supports PDF, PNG, JPG</p>
+                        {fileName && <p className="mt-4 text-[#4A90E2] font-medium">Selected: {fileName}</p>}
                     </div>
                 )}
 
                 {activeTab === 'url' && (
                     <div className="flex-1 flex flex-col items-center justify-center p-8">
                         <div className="w-full max-w-md">
-                            <label className="block text-sm font-medium text-slate-400 mb-2">Webpage URL</label>
+                            <label className="block text-sm font-medium text-[#555555] mb-2">Webpage URL</label>
                             <div className="flex space-x-2">
                                 <input
                                     type="url"
                                     value={urlInput}
                                     onChange={(e) => setUrlInput(e.target.value)}
                                     placeholder="https://example.com/article"
-                                    className="flex-1 px-4 py-3 bg-slate-900 border border-slate-700 rounded-lg text-slate-100 placeholder-slate-500 focus:ring-2 focus:ring-teal-500 focus:outline-none"
+                                    className="flex-1 px-4 py-3 bg-[#FDFBF7] border border-[#E2E8F0] rounded-lg text-[#333333] placeholder-[#888888] focus:ring-2 focus:ring-[#4A90E2] focus:outline-none"
                                     onKeyDown={(e) => e.key === 'Enter' && fetchUrl()}
                                 />
                                 <button
                                     onClick={fetchUrl}
                                     disabled={!urlInput.trim() || extracting}
-                                    className="px-6 py-3 bg-slate-700 hover:bg-slate-600 text-slate-200 font-medium rounded-lg disabled:opacity-50 transition-colors"
+                                    className="px-6 py-3 bg-[#F1F5F9] hover:bg-[#E2E8F0] text-[#333333] font-medium rounded-lg disabled:opacity-50 transition-colors"
                                 >
                                     Extract
                                 </button>
                             </div>
-                            <p className="text-xs text-slate-500 mt-4 text-center">We will extract the main article text, ignoring menus and ads.</p>
+                            <p className="text-xs text-[#888888] mt-4 text-center">We will extract the main article text, ignoring menus and ads.</p>
                         </div>
                     </div>
                 )}
@@ -153,7 +159,7 @@ export default function InputPanel({ inputText, setInputText, onSimplify, loadin
                 <button
                     onClick={onSimplify}
                     disabled={loading || !inputText.trim() || activeTab !== 'text'}
-                    className="mt-6 w-full py-4 bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-400 hover:to-cyan-400 disabled:from-slate-700 disabled:to-slate-700 rounded-xl text-white font-bold text-lg flex items-center justify-center shadow-lg transition-all transform active:scale-[0.98] disabled:active:scale-100 disabled:cursor-not-allowed group"
+                    className="mt-6 w-full py-4 bg-linear-to-r from-[#4A90E2] to-[#357ABD] hover:from-[#3a7ac4] hover:to-[#2c659e] disabled:from-[#E2E8F0] disabled:to-[#E2E8F0] disabled:text-[#888888] rounded-xl text-white font-bold text-lg flex items-center justify-center shadow-md transition-all transform active:scale-[0.98] disabled:active:scale-100 disabled:cursor-not-allowed group"
                 >
                     {loading ? (
                         <>

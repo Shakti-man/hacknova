@@ -3,6 +3,8 @@ import Header from './components/Header';
 import SettingsBar from './components/SettingsBar';
 import InputPanel from './components/InputPanel';
 import OutputPanel from './components/OutputPanel';
+import LandingPage from './components/LandingPage';
+import LoadingPage from './components/LoadingPage';
 import { Loader2 } from 'lucide-react';
 
 function App() {
@@ -10,6 +12,7 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [mode, setMode] = useState('simplified'); // simplified, bullets, plain
+  const [showLanding, setShowLanding] = useState(true);
 
   // Output and stats
   const [outputCache, setOutputCache] = useState({}); // { [inputTextHash_mode]: { result, readabilityBefore, readabilityAfter } }
@@ -54,7 +57,12 @@ function App() {
         body: JSON.stringify({ text: textToProcess, mode: targetMode }),
       });
 
-      const data = await response.json();
+      let data;
+      try {
+        data = await response.json();
+      } catch (e) {
+        throw new Error('Server returned an invalid response. Ensure the backend is running.');
+      }
 
       if (!response.ok) {
         throw new Error(data.error || 'Failed to simplify text.');
@@ -91,8 +99,12 @@ function App() {
     }
   };
 
+  if (showLanding) {
+    return <LandingPage onStart={() => setShowLanding(false)} />;
+  }
+
   return (
-    <div className="min-h-screen flex flex-col pt-16">
+    <div className="min-h-screen flex flex-col pt-16 bg-[#FDFBF7]">
       <Header />
       <SettingsBar
         useDyslexicFont={useDyslexicFont} setUseDyslexicFont={setUseDyslexicFont}
@@ -130,11 +142,13 @@ function App() {
       </main>
 
       {error && (
-        <div className="fixed bottom-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center shadow-red-500/20">
+        <div className="fixed bottom-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg flex items-center shadow-red-500/20 z-50">
           <span>{error}</span>
           <button onClick={() => setError(null)} className="ml-4 font-bold hover:text-red-200">×</button>
         </div>
       )}
+
+      {loading && <LoadingPage message="Simplifying your text..." />}
     </div>
   );
 }
