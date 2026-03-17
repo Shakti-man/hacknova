@@ -3,6 +3,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         sendResponse({ text: window.getSelection().toString() });
     }
 
+    if (request.action === "GET_PAGE_TEXT") {
+        const paragraphs = Array.from(document.querySelectorAll('p')).map(p => p.textContent);
+        sendResponse({ text: paragraphs.join('\n\n') });
+    }
+
     if (request.action === "SIMPLIFY_PAGE") {
         const paragraphs = Array.from(document.querySelectorAll('p')).map(p => p.textContent);
         const fullText = paragraphs.join('\n\n');

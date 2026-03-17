@@ -4,12 +4,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const loading = document.getElementById('loading');
     const resultDiv = document.getElementById('result');
 
-    // Try to get selected text from current tab
+    // Auto-scan page on open
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         if (tabs[0]) {
-            chrome.tabs.sendMessage(tabs[0].id, { action: "GET_SELECTED_TEXT" }, (response) => {
-                if (response && response.text) {
-                    inputText.value = response.text;
+            // First try selection
+            chrome.tabs.sendMessage(tabs[0].id, { action: "GET_SELECTED_TEXT" }, (selResponse) => {
+                if (selResponse && selResponse.text && selResponse.text.trim()) {
+                    inputText.value = selResponse.text;
+                } else {
+                    // If no selection, get all page text
+                    chrome.tabs.sendMessage(tabs[0].id, { action: "GET_PAGE_TEXT" }, (pageResponse) => {
+                        if (pageResponse && pageResponse.text) {
+                            // Truncate if too long for preview
+                            inputText.value = pageResponse.text.substring(0, 1000);
+                        }
+                    });
                 }
             });
         }
