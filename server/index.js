@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path');
 const cors = require('cors');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const dotenv = require('dotenv');
@@ -106,6 +107,15 @@ app.get('/api/fetch-url', async (req, res) => {
     console.error('Fetch URL Error:', error);
     res.status(500).json({ error: 'Failed to fetch contents from the URL' });
   }
+});
+
+// Serve static files from React app in production
+const clientBuildPath = path.join(__dirname, '../client/dist');
+app.use(express.static(clientBuildPath));
+
+// For any other request, return React's index.html (SPA routing support)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(clientBuildPath, 'index.html'));
 });
 
 app.listen(PORT, '0.0.0.0', () => {
