@@ -78,19 +78,20 @@ export default function OutputPanel({
                                 {subPart}
                                 {/* 
                                     PREMIUM TOOLTIP SYSTEM:
-                                    - Fixed Clipping: Tooltip is now truly above the toolbar because content area has higher z-index.
-                                    - Glassmorphism Styling for Premium Look.
+                                    - Fixed Clipping: Added higher z-index logic and removed overflow restrictions.
+                                    - Glassmorphism: Added backdrop blur and semi-transparent dark bg.
+                                    - Smart spacing: Increased margin to breathe.
                                 */}
                                 <span className={`
-                                    absolute bottom-full mb-4 px-5 py-4 bg-[#0F172ACB] backdrop-blur-md border border-slate-700/50
+                                    absolute bottom-full mb-4 px-5 py-4 bg-[#1E293B]/fb backdrop-blur-md border border-slate-700
                                     text-white text-sm rounded-2xl opacity-0 group-hover:opacity-100 transition-all 
-                                    pointer-events-none z-50 w-72 shadow-[0_20px_50px_rgba(0,0,0,0.6)] 
+                                    pointer-events-none z-[99999] w-72 shadow-[0_20px_50px_rgba(0,0,0,0.6)] 
                                     text-center leading-relaxed transform translate-y-2 group-hover:translate-y-0
                                     left-1/2 -translate-x-1/2 
-                                    before:content-[''] before:absolute before:top-full before:left-1/2 before:-translate-x-1/2 before:border-8 before:border-transparent before:border-t-[#0F172A]
+                                    before:content-[''] before:absolute before:top-full before:left-1/2 before:-translate-x-1/2 before:border-[8px] before:border-transparent before:border-t-[#1E293B]
                                 `}>
-                                    <span className="font-bold block mb-2 text-teal-400 uppercase tracking-widest text-[10px] border-b border-slate-700/30 pb-2 mx-auto w-fit px-4">
-                                        Vocabulary
+                                    <span className="font-bold block mb-2 text-teal-400 uppercase tracking-widest text-[11px] border-b border-slate-700/50 pb-2 mx-auto w-fit px-4">
+                                        Dictionary
                                     </span>
                                     <span className="font-semibold text-lg block mb-1 text-slate-100">{word}</span>
                                     <span className="text-slate-300 text-sm">{definition}</span>
@@ -110,9 +111,9 @@ export default function OutputPanel({
 
     return (
         <div className={`flex flex-col flex-1 bg-white rounded-2xl shadow-sm border border-[#E2E8F0] relative transition-all duration-500 ${focusMode ? 'h-full shadow-2xl border-[#4A90E2]/30' : 'h-full'}`}>
-            {/* Tabs - Low Z-index to prevent clipping tooltips */}
+            {/* Tabs - Reduced Z-Index to allow tooltips to pass */}
             {!focusMode && (
-                <div className="flex bg-white border-b border-[#E2E8F0] rounded-t-2xl z-0">
+                <div className="flex bg-white border-b border-[#E2E8F0] rounded-alpha-2xl z-0">
                     {tabs.map((tab) => (
                         <button
                             key={tab.id}
@@ -128,7 +129,7 @@ export default function OutputPanel({
                 </div>
             )}
 
-            {/* Toolbar - Low Z-index */}
+            {/* Toolbar - Set to lower z-index */}
             <div className={`px-6 py-3 border-b border-[#E2E8F0] flex justify-between items-center bg-[#F8FAFC]/50 z-0 ${focusMode ? 'py-4 rounded-t-2xl' : ''}`}>
                 <ReadabilityBadge before={readabilityBefore} after={readabilityAfter} />
 
@@ -160,8 +161,8 @@ export default function OutputPanel({
                 </div>
             </div>
 
-            {/* Content Area - THE REAL FIX: Set overflow-visible and relative with HIGH z-index (z-20) */}
-            <div className={`flex-1 relative transition-all duration-500 overflow-visible z-20 ${focusMode ? 'flex items-center justify-center bg-white' : 'p-10 pt-20 bg-[#FDFBF7]'}`}>
+            {/* Content Area - THE REAL FIX: Set overflow-visible and relative with high z-index */}
+            <div className={`flex-1 relative transition-all duration-500 overflow-visible z-10 ${focusMode ? 'flex items-center justify-center bg-white' : 'p-10 pt-16 bg-[#FDFBF7]'}`}>
                 {loading ? (
                     <div className="p-8 w-full animate-pulse space-y-4">
                         <div className="h-4 bg-[#E2E8F0] rounded w-3/4"></div>
@@ -209,7 +210,7 @@ export default function OutputPanel({
                         </div>
                     ) : (
                         <div
-                            className={`whitespace-pre-wrap animate-fade-in text-[#333333] selection:bg-teal-100 relative ${useDyslexicFont ? 'font-lexy' : 'font-sans'}`}
+                            className={`whitespace-pre-wrap animate-fade-in text-[#333333] selection-bg-teal-100 relative ${useDyslexicFont ? 'font-lexy' : 'font-sans'}`}
                             style={{
                                 fontSize: `${fontSize}px`,
                                 lineHeight: lineHeight,
@@ -227,7 +228,7 @@ export default function OutputPanel({
             </div>
             
             {focusMode && (
-                <div className="absolute top-4 left-1/2 -translate-x-1/2 text-[#94A3B8] text-[10px] font-bold uppercase tracking-[0.2em] opacity-40 bg-[#F1F5F9] px-3 py-1 rounded-full z-50">
+                <div className="absolute top-4 left-1/2 -translate-x-1/2 text-[#94A3B8] text-[10px] font-bold uppercase tracking-[0.2em] opacity-40 bg-[#F1F5F9] px-3 py-1 rounded-full z-20">
                     Focus Cards Active
                 </div>
             )}

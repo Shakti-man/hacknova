@@ -66,7 +66,7 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
                         overlay.style.boxShadow = "0 20px 25px -5px rgba(0, 0, 0, 0.5)";
                         overlay.style.border = "1px solid #334155";
 
-                        const fontUrl = "https://fonts.cdnfonts.com/css/opendyslexic";
+                        const fontUrl = "https://cdn.jsdelivr.net/npm/opendyslexic@1.0.3/opendyslexic.css";
                         if (!document.querySelector(`link[href="${fontUrl}"]`)) {
                             const link = document.createElement("link");
                             link.href = fontUrl;

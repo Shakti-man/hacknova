@@ -1,4 +1,9 @@
 @import "tailwindcss";
+@import url('https://cdn.jsdelivr.net/npm/opendyslexic@1.0.3/opendyslexic.css');
+
+.font-lexy {
+  font-family: 'OpenDyslexic', sans-serif !important;
+}
 
 @layer utilities {
   .animate-fade-in {

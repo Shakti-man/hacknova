@@ -110,7 +110,12 @@ function App() {
 
   return (
     <div className={`min-h-screen flex flex-col transition-all duration-500 bg-[#FDFBF7] ${focusMode ? 'pt-0' : 'pt-16'}`}>
-      {!focusMode && <Header onToggleFocus={() => setFocusMode(true)} />}
+      {!focusMode && (
+        <Header 
+          onToggleFocus={() => setFocusMode(true)} 
+          onGoHome={() => setShowLanding(true)} 
+        />
+      )}
       
       {!focusMode && (
         <SettingsBar
