@@ -35,6 +35,6 @@ The application will be available at `http://localhost:5173`.
 ## Tech Stack
 - Frontend: React (Vite) + Tailwind CSS
 - Backend: Node.js + Express
-- AI: OpenAI GPT-4o-mini
+- AI: Gemini
 - OCR & Parsing: Tesseract.js (browser) & pdf-parse (server)
 - TTS: Web Speech API
